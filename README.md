@@ -35,7 +35,7 @@ This project is an **AI-powered keyword research automation** built with [n8n](h
 Each keyword in the output includes:
 ```json
 {
-  "keyword": "collabora online for schools",
+  "keyword": "docker desktop for windows",
   "intent": "informational"
 }
 ```
