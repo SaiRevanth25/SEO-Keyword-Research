@@ -7,7 +7,7 @@ This project is an **AI-powered keyword research automation** built with [n8n](h
 ## 🚀 How It Works
 
 1. **User Input via Chat**  
-   Enter a single **seed keyword** in the chat interface (e.g., `collabora online`).
+   Enter a single **seed keyword** in the chat interface (e.g., `docker desktop`).
 
 2. **Google Autocomplete API (SerpAPI)**  
    The workflow makes a real-time HTTP request to [SerpAPI](https://serpapi.com/) to fetch Google Autocomplete suggestions for that keyword.
@@ -29,6 +29,13 @@ This project is an **AI-powered keyword research automation** built with [n8n](h
    - A clean Markdown table showing keyword + intent
 
 ---
+## Workflow
+<img width="1760" height="706" alt="image" src="https://github.com/user-attachments/assets/2498b6b5-e3a7-443e-bfe3-2ae57e9777fa" />
+
+Get serpapi key - https://serpapi.com/
+
+Get Google gemini api key - https://aistudio.google.com/app/apikey
+
 
 ## 📦 Output Format
 
