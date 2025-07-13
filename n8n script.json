@@ -1,0 +1,436 @@
+{
+  "name": "SEO Keyword Research",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "google/gemini-2.5-flash-lite-preview-06-17",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        620,
+        -220
+      ],
+      "id": "4d454891-1906-497e-83ad-1d45c6fa8e22",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "c0PpoTLMCpdXgbir",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Extract reference keywords').item.json.prompt }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        -220
+      ],
+      "id": "8edd876f-3d20-493c-9b5d-6364367ecb7c",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google_autocomplete"
+            },
+            {
+              "name": "=q",
+              "value": "={{ $json.q }}"
+            },
+            {
+              "name": "num",
+              "value": "50"
+            },
+            {
+              "name": "api_key",
+              "value": "ac305f796d35a67ecc03d2ef976eb8bd9f9e780956b5d1013d19426dbd6fce16"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        -460
+      ],
+      "id": "4e1e1581-8a91-4a23-8a77-f490bc3f700f",
+      "name": "Serpapi Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const suggestions = items[0].json.suggestions;\n\nconst values = suggestions.map(s => `- ${s.value}`).join('\\n');\n\nconst prompt = `Search suggestions: \\n${values}`;\n\nreturn [{\n  json: {\n    prompt\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -460
+      ],
+      "id": "3699764a-74fa-4a2e-886f-050f6ccd4875",
+      "name": "Extract reference keywords"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5ee3728f-6e77-4a41-901d-ad4ec35185c0",
+              "name": "q",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -340,
+        -460
+      ],
+      "id": "58823b22-55f2-4d52-b3b8-2c0a41ed8110",
+      "name": "Edit Seed Keyword"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "You are an expert SEO Keyword Research Agent.\n\nYour task is to take seed keywords as input and generate a list of **exactly 50 keyword suggestions** that:\n- Are closely related to the seed keyword in meaning or intent.\n- Have the **highest monthly search volume**.\n- Have the **lowest possible competition**, making them easy to rank for on the first page of Google search.\n- Preferably include **long-tail keywords** that indicate specific user intent (e.g., \"global internship programs for undergraduates 2025\").\n- Are **actionable and suitable** for real content or campaign planning.\n- Are in **English** and relevant globally unless otherwise specified.\n\nReturn the output as a JSON list with the following fields for each keyword: (dont return search_volume and competition_score)\n- `keyword`\n- `intent` (e.g., informational, transactional, navigational)\n\nOnly include keywords that are **likely to help the user rank on the first page of Google**. Use available keyword databases or APIs to inform your suggestions.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -460
+      ],
+      "id": "bee55d0c-9ef7-413e-bb55-1d0e7f39fbf7",
+      "name": "Keywords Researcher"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "binaryPropertyName": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1140,
+        -560
+      ],
+      "id": "3f115ee5-d6d4-4b01-be26-be9a5c1d6e12",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "content": "### Enter the *Seed Keyword* in chat mesage",
+        "height": 300,
+        "width": 460,
+        "color": 4
+      },
+      "id": "268742ab-d940-4270-a3da-6ee3e91a46d7",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -620,
+        -560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### HTTP request to *serpapi* and extracting the *relevant keywords*",
+        "height": 300,
+        "width": 480,
+        "color": 4
+      },
+      "id": "d839ad14-abf7-4b8e-bde1-6f1e218c1b01",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -60,
+        -560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Returns **50** Keywords to use to be on *first page* of *Google search*",
+        "height": 560,
+        "width": 740,
+        "color": 4
+      },
+      "id": "3af5aada-8a4c-42fc-b6ab-a2f33246309d",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        -580
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        -460
+      ],
+      "id": "e3300465-4e99-4131-9fa3-50333b81b928",
+      "name": "When chat message received",
+      "webhookId": "9a72ac4f-a524-4f61-ade5-048aa4cb226b"
+    },
+    {
+      "parameters": {
+        "content": "## Generate new keywords for SEO with a *Seed Keyword*\n\nThis workflow helps you generate 50 high-impact SEO keywords starting from just one ***seed keyword*** optimized to improve your chances of ranking on the first page of Google.\n\n## How it works:\n1. Enter a single keyword to kick off the research.\n2.  The workflow sends a HTTP request to the *SERP API* to fetch Google Autocomplete suggestions, revealing real user intent.\n3. All related autocomplete keywords are collected and cleaned.\n4.  An ***AI agent*** analyzes the keyword set and generates **50** strategic keyword suggestions tailored for SEO.\n5. The final keyword list is delivered in a clean, structured .json file for easy use in SEO tools or content planning.\n\nMade by [@Sai Revanth](https://www.linkedin.com/in/hey-sai/)",
+        "height": 440,
+        "width": 580,
+        "color": 7
+      },
+      "id": "845a81cc-9fc1-4421-a542-0f00b87d28c3",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -180,
+        -180
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse(items[0].json.output);\nreturn parsed.map((entry, index) => ({\n  json: {\n    index: index + 1,\n    keyword: entry.keyword,\n    intent: entry.intent\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        -180
+      ],
+      "id": "43672218-ee43-4e18-ad5e-50c0b4e35cba",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "let header = '| # | Keyword | Intent |\\n|---|---------|--------|\\n';\nlet rows = items.map(item => {\n  return `| ${item.json.index} | ${item.json.keyword} | ${item.json.intent} |`;\n});\nlet markdownTable = '### 📊 Collabora Online Keyword Intent Table\\n\\n' + header + rows.join('\\n');\n\nreturn [\n  {\n    json: {\n      message: markdownTable\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1640,
+        -180
+      ],
+      "id": "e2a7ae80-3b9f-45a7-9cdc-5249cf8ee2f6",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "3c15bbaa-77fa-4f16-9661-1d844c574514",
+      "name": "return Keywords",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        1140,
+        -180
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Converting to **Markdown**",
+        "height": 220,
+        "width": 400,
+        "color": 4
+      },
+      "id": "9579e27b-9133-44ab-95dd-2603dcc5eca6",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1380,
+        -240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5837e3ad-41b6-4392-8949-665cda2cfe46",
+              "name": "",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1860,
+        -180
+      ],
+      "id": "86b5e0f1-dad3-451b-9584-5c75cce1db48",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Keywords Researcher",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Keywords Researcher",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serpapi Request": {
+      "main": [
+        [
+          {
+            "node": "Extract reference keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract reference keywords": {
+      "main": [
+        [
+          {
+            "node": "Keywords Researcher",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Seed Keyword": {
+      "main": [
+        [
+          {
+            "node": "Serpapi Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keywords Researcher": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "return Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Edit Seed Keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "return Keywords": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "68ec92ee-502a-4cec-83d1-dd4a7716d718",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9401b0a3937e31c241177d34a8b855d8a19b7465cfdb7cdc9ba11b7c3a3d7d1c"
+  },
+  "id": "VwfiC13JPMR2BJK4",
+  "tags": []
+}
